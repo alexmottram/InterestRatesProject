@@ -2,18 +2,27 @@ function InterestRate_Calibration()
     CalFile = load('CalibrationData.mat');
     CalData = CalFile.CalibrationData;
     
-    for i = 1:size(CalData(:,1))
-        ForwardRates = ()
-    end
+    init_gamma = 0.065;
+    init_sigma = 0.015;
+    init_meanRate = 0.06;
+        
+    tempfwrd = CalData(2:end,3) + ...
+        (CalData(2:end,3)-CalData(1:end-1,3)).*(CalData(2:end,1)./(CalData(2:end,1)-CalData(1:end-1,1)));
     
+    ForwardRates = [CalData(1,3); tempfwrd];    
+    plot(CalData(:,1),ForwardRates)
     
-    plot(CalData(:,1),CalData(:,2))
+    parameters = [init_gamma,init_sigma,init_meanRate];
+    
     
     
     
 end
 
-function [price] = VasicekPricing(t,Expiry,gamma,sigma,meanRate,rt)
+function [price] = VasicekPricing(t,Expiry,parameters,rt)
+    gamma = parameters(1);
+    sigma = parameters(2);
+    meanRate = parameters(3);
     price = exp(Afunc(t,Expiry,gamma,sigma,meanRate)-(Bfunc(t,Expiry,gamma)*rt));
 end
 
