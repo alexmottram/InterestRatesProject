@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/cygdrive/c/Git/InterestRates/VasicekModel.cpp
+VasicekModel.h
+/cygdrive/c/Git/InterestRates/VasicekModel.h
+
+/cygdrive/c/Git/InterestRates/VasicekModel.h
+random
+-
+
+/cygdrive/c/Git/InterestRates/main.cpp
+iostream
+-
+fstream
+-
+string
+-
+VasicekModel.h
+/cygdrive/c/Git/InterestRates/VasicekModel.h
+
