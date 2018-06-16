@@ -1,4 +1,5 @@
-function InterestRateCal_rand()
+
+function InterestRateCal_singlefit()
 
     CalFile = load('CalibrationData.mat');
     CalData = CalFile.CalibrationData;
@@ -11,62 +12,38 @@ function InterestRateCal_rand()
     init_meanRate = 0.0579;
     init_spotInterestRate = 0.0095;
     init_params = [init_gamma,init_meanRate,init_spotInterestRate];
-    
     sigma = 0.015;
     t = 0;
     
     tempfwrdrates = ZCRates(2:end) + ...
         (ZCRates(2:end)-ZCRates(1:end-1)).*(Expiry(2:end)./(Expiry(2:end)-Expiry(1:end-1)));
     
-    ForwardRates = [ZCRates(1); tempfwrdrates];
-    
-%   Creates random starting positions for the optimization
-    no_Seeds = 10000;
-    Param_Seeds = [];
-    
-    for i = 1:no_Seeds
-        rand_gamma = normrnd(init_gamma,sqrt(init_gamma)/10);   
-        rand_meanRate = normrnd(init_meanRate,sqrt(init_meanRate)/10);
-        rand_spotInterestRate = normrnd(init_spotInterestRate,sqrt(init_spotInterestRate)/10);        
-        Param_Seeds(i,:) = [abs(rand_gamma),abs(rand_meanRate),abs(rand_spotInterestRate)];
-    end
+    ForwardRates = [ZCRates(1); tempfwrdrates];    
     
     hold off
     plot(Expiry,RealPrices,'r')
-    hold on    
-    prefitPrices = VasicekPricing(t,Expiry,init_params,sigma);    
+    hold on
+    
+    prefitPrices = VasicekPricing(t,Expiry,init_params,sigma);
+    
     plot(Expiry,prefitPrices,'b')
     
-%   Preamble for the least square non-linear solver
     funcIR = @(params)VasicekCalibrate(t,Expiry,params,sigma,RealPrices);
     
     lb = [0,0,0];
     ub = [2,0.1,0.1];
     options = optimoptions(@lsqnonlin,'OptimalityTolerance',1E-9,...
-        'FunctionTolerance',1E-9)
+        'FunctionTolerance',1E-9,'Display','iter')
+    solved_params = lsqnonlin(funcIR,init_params,[],[],options);
     
-%   Keeps track of best fit residual and stores parameters
-    best_fit_params = init_params;
-    [solved_params,resnorm] = lsqnonlin(funcIR,init_params,[],[],options);
-    best_fit_residual = resnorm;
-    
-%   Runs through     
-    for i = 1:no_Seeds
-        [solved_params,resnorm] = lsqnonlin(funcIR,Param_Seeds(i,:),[],[],options);
-        
-        if (resnorm < best_fit_residual)
-            best_fit_params = solved_params;
-            best_fit_residual = resnorm
-        end
-    end
     
     fittedPrices = VasicekPricing(t,Expiry,solved_params,sigma);
     
     plot(Expiry,fittedPrices,'g')
     
-    final_gamma = best_fit_params(1)
-    final_meanRate = best_fit_params(2)
-    final_spotinterest = best_fit_params(3)    
+    final_gamma = solved_params(1)
+    final_meanRate = solved_params(2)
+    final_spotinterest = solved_params(3)    
     final_sigma = sigma
     
     

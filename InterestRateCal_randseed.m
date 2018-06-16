@@ -1,4 +1,4 @@
-function InterestRateCal_rand()
+function InterestRateCal_randseed()
 
     CalFile = load('CalibrationData.mat');
     CalData = CalFile.CalibrationData;
@@ -27,7 +27,9 @@ function InterestRateCal_rand()
     for i = 1:no_Seeds
         rand_gamma = normrnd(init_gamma,sqrt(init_gamma)/10);   
         rand_meanRate = normrnd(init_meanRate,sqrt(init_meanRate)/10);
-        rand_spotInterestRate = normrnd(init_spotInterestRate,sqrt(init_spotInterestRate)/10);        
+        rand_spotInterestRate = normrnd(init_spotInterestRate,sqrt(init_spotInterestRate)/10);
+        % abs() is used to avoid negative starting seeds, inelegant but
+        % effective
         Param_Seeds(i,:) = [abs(rand_gamma),abs(rand_meanRate),abs(rand_spotInterestRate)];
     end
     
@@ -38,21 +40,21 @@ function InterestRateCal_rand()
     plot(Expiry,prefitPrices,'b')
     
 %   Preamble for the least square non-linear solver
-    funcIR = @(params)VasicekCalibrate(t,Expiry,params,sigma,RealPrices);
-    
+    funcIR = @(params)VasicekCalibrate(t,Expiry,params,sigma,RealPrices);    
     lb = [0,0,0];
     ub = [2,0.1,0.1];
     options = optimoptions(@lsqnonlin,'OptimalityTolerance',1E-9,...
         'FunctionTolerance',1E-9)
     
-%   Keeps track of best fit residual and stores parameters
-    best_fit_params = init_params;
+%   Keeps track of best fit residual and stores parameters    
     [solved_params,resnorm] = lsqnonlin(funcIR,init_params,[],[],options);
+    best_fit_params = solved_params;
     best_fit_residual = resnorm;
     
-%   Runs through     
+%   Runs through the seeds and performs a least squares fit on each seed keeping
+%   the data if it better than the previous best fit.
     for i = 1:no_Seeds
-        [solved_params,resnorm] = lsqnonlin(funcIR,Param_Seeds(i,:),[],[],options);
+        [solved_params,resnorm] = lsqnonlin(funcIR,Param_Seeds(i,:),lb,[],options);
         
         if (resnorm < best_fit_residual)
             best_fit_params = solved_params;
@@ -60,7 +62,7 @@ function InterestRateCal_rand()
         end
     end
     
-    fittedPrices = VasicekPricing(t,Expiry,solved_params,sigma);
+    fittedPrices = VasicekPricing(t,Expiry,best_fit_params,sigma);
     
     plot(Expiry,fittedPrices,'g')
     
