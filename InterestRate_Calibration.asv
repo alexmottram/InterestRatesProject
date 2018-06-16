@@ -12,18 +12,15 @@ function InterestRate_Calibration()
     
     ForwardRates = [CalData(1,3); tempfwrd];
     Expiry = CalData(1:end,1);
-    RealPrices = CalData(1:end,2);
     t = 0;
     
-    plot(Expiry,RealPrices,'r')
+    plot(CalData(:,1),CalData(:,2))
     
     funcIR = @(params)VasicekPricing(t,Expiry,params,ForwardRates);
     
     solved_params = lsqnonlin(funcIR,init_params);
     
-    lsqPrices = VasicekPricing(t,Expiry,solved_params,ForwardRates);
     
-    plot(Expiry,lsqPrices,'g')
      
     
     
