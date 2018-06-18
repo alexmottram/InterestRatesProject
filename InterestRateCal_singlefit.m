@@ -1,6 +1,3 @@
-
-function InterestRateCal_singlefit()
-
     CalFile = load('CalibrationData.mat');
     CalData = CalFile.CalibrationData;
     
@@ -8,7 +5,7 @@ function InterestRateCal_singlefit()
     RealPrices = CalData(1:end,2);
     ZCRates = CalData(1:end,3); 
     
-    init_gamma = 0.74;
+    init_gamma = 0.74; 
     init_meanRate = 0.0579;
     init_spotInterestRate = 0.0095;
     init_params = [init_gamma,init_meanRate,init_spotInterestRate];
@@ -45,9 +42,6 @@ function InterestRateCal_singlefit()
     final_meanRate = solved_params(2)
     final_spotinterest = solved_params(3)    
     final_sigma = sigma
-    
-    
-end
 
 function [diff] = VasicekCalibrate(t,Expiry,params,sigma,RealPrices)
     diff = (VasicekPricing(t,Expiry,params,sigma)-RealPrices).^2;

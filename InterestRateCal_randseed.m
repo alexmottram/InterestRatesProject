@@ -1,5 +1,3 @@
-function InterestRateCal_randseed()
-
     CalFile = load('CalibrationData.mat');
     CalData = CalFile.CalibrationData;
     
@@ -70,9 +68,6 @@ function InterestRateCal_randseed()
     final_meanRate = best_fit_params(2)
     final_spotinterest = best_fit_params(3)    
     final_sigma = sigma
-    
-    
-end
 
 function [diff] = VasicekCalibrate(t,Expiry,params,sigma,RealPrices)
     diff = (VasicekPricing(t,Expiry,params,sigma)-RealPrices).^2;
